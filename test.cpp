@@ -51,18 +51,23 @@ int main(int argc, char * argv[])
 
 	vil_image_view<float> im(nim->dim[1],nim->dim[2],atoi(argv[1]));
 
+	//printf("1\n"); 
+
 	for(int i=0;i<im.ni();i++)
 	{
 		for(int j=0;j<im.nj();j++)
 		{
 			for(int k=0;k<im.nplanes();k++)
 			{
-				im(i,j,k) = (mydata[k*im.ni()*im.nj()+i*im.nj()+j+510*im.ni()*im.nj()]-minvox)/maxgap;
+				im(i,j,k) = (mydata[k*im.ni()*im.nj()+i*im.nj()+j+0*im.ni()*im.nj()]-minvox)/maxgap;
 				//if(i%20==1) im(i,j,k)=im(i-1,j,k);
 				//else im(i,j,k)=1;
 			}
 		}
 	}
+
+
+	//printf("2\n");exit(0);
 
 	//vil_image_view<vxl_byte> tim = vil_load("other.jpg");
 	//
@@ -108,13 +113,14 @@ int main(int argc, char * argv[])
 		//printf("\n");
 	}
 
-
+	if(1)
+	{
 	vgui::init(argc,argv);
 
 	vgui_image_tableau_new image(im2);
     vgui_viewer2D_tableau_new viewer(image);
     vgui::run(viewer, image->width(), image->height());
-	
+	}
 
 
 	nifti_image_free( nim );

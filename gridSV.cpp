@@ -27,32 +27,39 @@ gridSV<T>::gridSV(vil_image_view<T> &im, int voxelsize)
 	volumeElimination::vector3i ylabel;
 	volumeElimination::vector3i zlabel;
 
-	xlabel.resize(voxelsize);
-	ylabel.resize(voxelsize);
-	zlabel.resize(voxelsize);
+	xlabel.resize(_width);
+	ylabel.resize(_width);
+	zlabel.resize(_width);
 	_label.resize(_width);
 
-	for(int i=0;i<voxelsize;i++)
-	{
-		xlabel[i].resize(voxelsize);
-		ylabel[i].resize(voxelsize);
-		zlabel[i].resize(voxelsize);
+	//for(int i=0;i<voxelsize;i++)
+	//{
+	//	xlabel[i].resize(voxelsize);
+	//	ylabel[i].resize(voxelsize);
+	//	zlabel[i].resize(voxelsize);
 
-		for(int j=0;j<voxelsize;j++)
-		{
-			xlabel[i][j].resize(voxelsize);
-			ylabel[i][j].resize(voxelsize);
-			zlabel[i][j].resize(voxelsize);
-		}
-	}
+	//	for(int j=0;j<voxelsize;j++)
+	//	{
+	//		xlabel[i][j].resize(voxelsize);
+	//		ylabel[i][j].resize(voxelsize);
+	//		zlabel[i][j].resize(voxelsize);
+	//	}
+	//}
 
 	for(int i=0;i<_width;i++)
 	{
 		_label[i].resize(_height);
+		xlabel[i].resize(_height);
+		ylabel[i].resize(_height);
+		zlabel[i].resize(_height);
+
 
 		for(int j=0;j<_height;j++)
 		{
 			_label[i][j].resize(_layers);
+			xlabel[i][j].resize(_layers);
+			ylabel[i][j].resize(_layers);
+			zlabel[i][j].resize(_layers);
 		}
 	}
 
@@ -129,6 +136,24 @@ gridSV<T>::gridSV(vil_image_view<T> &im, int voxelsize)
 							if(ii==0&&i+ii>0)
 							{
 								vex.addDataterm(ii,jj,kk,xsign*cost(im(i+ii,j+jj,k+kk),im(i+ii-1,j+jj,k+kk)));
+
+								if(ylabel[i+ii-1][j+jj][k+kk]<0)
+								{
+									vey.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii-1,j+jj,k+kk)));
+								}
+								else
+								{
+									vey.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii-1,j+jj,k+kk)));
+								}
+
+								if(zlabel[i+ii-1][j+jj][k+kk]<0)
+								{
+									vez.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii-1,j+jj,k+kk)));
+								}
+								else
+								{
+									vez.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii-1,j+jj,k+kk)));
+								}
 							}
 							else if(ii==voxelsize-1&&i+ii<_width-1)
 							{
@@ -137,7 +162,25 @@ gridSV<T>::gridSV(vil_image_view<T> &im, int voxelsize)
 
 							if(jj==0&&j+jj>0)
 							{
+								if(xlabel[i+ii][j+jj-1][k+kk]<0)
+								{
+									vex.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj-1,k+kk)));
+								}
+								else
+								{
+									vex.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj-1,k+kk)));
+								}
+
 								vey.addDataterm(ii,jj,kk,ysign*cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj-1,k+kk)));
+
+								if(zlabel[i+ii][j+jj-1][k+kk]<0)
+								{
+									vez.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj-1,k+kk)));
+								}
+								else
+								{
+									vez.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj-1,k+kk)));
+								}
 							}
 							else if(jj==voxelsize-1&&j+jj<_height-1)
 							{
@@ -146,6 +189,24 @@ gridSV<T>::gridSV(vil_image_view<T> &im, int voxelsize)
 
 							if(kk==0&&k+kk>0)
 							{
+								if(xlabel[i+ii][j+jj][k+kk-1]<0)
+								{
+									vex.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj,k+kk-1)));
+								}
+								else
+								{
+									vex.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj,k+kk-1)));
+								}
+
+								if(ylabel[i+ii][j+jj][k+kk-1]<0)
+								{
+									vey.addDataterm(ii,jj,kk,cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj,k+kk-1)));
+								}
+								else
+								{
+									vey.addDataterm(ii,jj,kk,-cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj,k+kk-1)));
+								}
+
 								vez.addDataterm(ii,jj,kk,zsign*cost(im(i+ii,j+jj,k+kk),im(i+ii,j+jj,k+kk-1)));
 							}
 							else if(kk==voxelsize-1&&k+kk<_layers-1)
@@ -172,11 +233,11 @@ gridSV<T>::gridSV(vil_image_view<T> &im, int voxelsize)
 						for(int kk=0;kk<voxelsize&&k+kk<_layers;kk++)
 						{
 //printf("iijjkk=%d %d %d %d\n",ii,jj,kk,vex.getLabel(ii,jj,kk));
-							xlabel[ii][jj][kk] = (2*vex.getLabel(ii,jj,kk)-1)*(i/voxelsize*2+1)+xsign;
-							ylabel[ii][jj][kk] = (2*vey.getLabel(ii,jj,kk)-1)*(j/voxelsize*2+1)+ysign;
-							zlabel[ii][jj][kk] = (2*vez.getLabel(ii,jj,kk)-1)*(k/voxelsize*2+1)+zsign;
-							_label[i+ii][j+jj][k+kk] = xlabel[ii][jj][kk]*8+ylabel[ii][jj][kk]*4;//+zlabel[i+ii][j+jj][k+kk];
-							//_label[i+ii][j+jj][k+kk] = zlabel[i+ii][j+jj][k+kk];
+							xlabel[i+ii][j+jj][k+kk] = (2*vex.getLabel(ii,jj,kk)-1)*(i/voxelsize*2+1)+xsign;
+							ylabel[i+ii][j+jj][k+kk] = (2*vey.getLabel(ii,jj,kk)-1)*(j/voxelsize*2+1)+ysign;
+							zlabel[i+ii][j+jj][k+kk] = (2*vez.getLabel(ii,jj,kk)-1)*(k/voxelsize*2+1)+zsign;
+							_label[i+ii][j+jj][k+kk] = xlabel[i+ii][j+jj][k+kk]*60+ylabel[i+ii][j+jj][k+kk];//+zlabel[i+ii][j+jj][k+kk];
+
 
 						}
 					}
